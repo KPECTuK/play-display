@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2015
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tests-play-display", "tests-play-display.csproj", "{ECE30222-5EAC-B6A9-6803-BDA9DA1DDA4D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tests-play-display.Editor", "tests-play-display.Editor.csproj", "{34130134-126E-8F7E-9F18-783C5049CDA9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{ECE30222-5EAC-B6A9-6803-BDA9DA1DDA4D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ECE30222-5EAC-B6A9-6803-BDA9DA1DDA4D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ECE30222-5EAC-B6A9-6803-BDA9DA1DDA4D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ECE30222-5EAC-B6A9-6803-BDA9DA1DDA4D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34130134-126E-8F7E-9F18-783C5049CDA9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34130134-126E-8F7E-9F18-783C5049CDA9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34130134-126E-8F7E-9F18-783C5049CDA9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34130134-126E-8F7E-9F18-783C5049CDA9}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
