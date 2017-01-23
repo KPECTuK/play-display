@@ -11,7 +11,7 @@
 		Tags
 		{
 			"RenderType" = "Opaque"
-			"LightMode" = "PrePassFinal"
+			//"LightMode" = "PrePassFinal"
 		}
 
 		Fog
@@ -59,7 +59,7 @@
 					return o;
 				}
 
-				half4 frag(v2f i) : COLOR
+				float4 frag(v2f i) : COLOR
 				{
 					return tex2D (_Atlas, i.uv);
 				}

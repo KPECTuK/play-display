@@ -7,7 +7,7 @@ Material:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: DefaultTarget
-  m_Shader: {fileID: 10752, guid: 0000000000000000f000000000000000, type: 0}
+  m_Shader: {fileID: 4800000, guid: 9920322663bae244baca21ff8d317485, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 5
   m_CustomRenderQueue: -1
@@ -22,12 +22,34 @@ Material:
           m_Texture: {fileID: 0}
           m_Scale: {x: -1, y: -1}
           m_Offset: {x: 0, y: 0}
-    m_Floats: {}
+      data:
+        first:
+          name: _Marker
+        second:
+          m_Texture: {fileID: 2800000, guid: 1cfe45cc143d4da5bca5a6668c0f26ed, type: 3}
+          m_Scale: {x: 1, y: 1}
+          m_Offset: {x: 0, y: 0}
+      data:
+        first:
+          name: _Atlas
+        second:
+          m_Texture: {fileID: 2800000, guid: 393802fbe4c5de0499d5fd912dac5eaf, type: 3}
+          m_Scale: {x: 1, y: 1}
+          m_Offset: {x: 0, y: 0}
+    m_Floats:
+      data:
+        first:
+          name: _Mode
+        second: 0
+      data:
+        first:
+          name: _Index
+        second: 0
     m_Colors:
       data:
         first:
           name: _Color
-        second: {r: .820895553, g: .820895553, b: .820895553, a: 1}
+        second: {r: 1, g: 0.041, b: 0.015686275, a: 1}
 --- !u!1002 &2100001
 EditorExtensionImpl:
   serializedVersion: 6

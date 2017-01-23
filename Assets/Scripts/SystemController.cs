@@ -64,20 +64,19 @@ namespace Assets.Scripts
 		// ReSharper disable once UnusedMember.Local
 		private void LateUpdate()
 		{
-			if(_sources.Length > 1)
+			if(_sources.Length <= 1)
+				return;
+			var distance = Vector3.Distance(_sources[0].Transform.position, _sources[1].Transform.position);
+			_text.SetDistance(distance);
+			if(distance > DISTANCE_THRESHIOLD_F && !_isHidden)
 			{
-				var distance = Vector3.Distance(_sources[0].Transform.position, _sources[1].Transform.position);
-				_text.SetDistance(distance);
-				if(distance > DISTANCE_THRESHIOLD_F && !_isHidden)
-				{
-					Array.ForEach(_sources, _ => _.HideSpecial());
-					_isHidden = true;
-				}
-				if(distance < DISTANCE_THRESHIOLD_F && _isHidden)
-				{
-					Array.ForEach(_sources, _ => _.ShowSpecial());
-					_isHidden = false;
-				}
+				Array.ForEach(_sources, _ => _.HideSpecial());
+				_isHidden = true;
+			}
+			if(distance < DISTANCE_THRESHIOLD_F && _isHidden)
+			{
+				Array.ForEach(_sources, _ => _.ShowSpecial());
+				_isHidden = false;
 			}
 		}
 	}

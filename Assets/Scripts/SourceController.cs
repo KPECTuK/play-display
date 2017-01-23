@@ -24,17 +24,17 @@ namespace Assets.Scripts
 
 			void ITrackableEventHandler.OnTrackableStateChanged(TrackableBehaviour.Status previousStatus, TrackableBehaviour.Status newStatus)
 			{
-				if (_source != null)
+				if(_source == null)
+					return;
+
+				switch (newStatus)
 				{
-					switch (newStatus)
-					{
-						case TrackableBehaviour.Status.TRACKED:
-							_source.OnSourceEnable();
-							break;
-						case TrackableBehaviour.Status.NOT_FOUND:
-							_source.OnSourceDisable();
-							break;
-					}
+					case TrackableBehaviour.Status.TRACKED:
+						_source.OnSourceEnable();
+						break;
+					case TrackableBehaviour.Status.NOT_FOUND:
+						_source.OnSourceDisable();
+						break;
 				}
 			}
 		}
@@ -81,17 +81,16 @@ namespace Assets.Scripts
 		public void RemoveTarget(SourceController target)
 		{
 			var link = _targets.FindIndex(inspecting => inspecting == target);
-			if(link != -1)
-			{
-				_targets[link] = null;
-				UpdateExisting();
-				for(var counter = 0; counter < _links.Count; counter++)
-					_links[counter] =
-						_links[counter] == link
-							? (_existing.Count > 0 ? _existing[SelectRandomExistingTarget()] : -1)
-							: _links[counter];
-				UpdateExisting();
-			}
+			if(link == -1)
+				return;
+			_targets[link] = null;
+			UpdateExisting();
+			for(var counter = 0; counter < _links.Count; counter++)
+				_links[counter] =
+					_links[counter] == link
+						? (_existing.Count > 0 ? _existing[SelectRandomExistingTarget()] : -1)
+						: _links[counter];
+			UpdateExisting();
 		}
 
 		public void HideSpecial()
@@ -159,8 +158,11 @@ namespace Assets.Scripts
 		{
 			base.Awake();
 
-			_special = GetComponentsInChildren<Component>(true)
-				.Where(component => component.name.StartsWith("sphere_"))
+			_special = 
+				GetComponentsInChildren<Transform>(true)
+				.FirstOrDefault(_ => _.name.StartsWith("special_"))
+				.GetComponentsInChildren<Component>(true)
+				.Where(_ => _.name.StartsWith("sphere_"))
 				.Aggregate(new List<GameObject>(), (list, component) =>
 				{
 					var check =
@@ -172,6 +174,7 @@ namespace Assets.Scripts
 				})
 				.Select(@object => @object.GetComponent<MeshRenderer>())
 				.ToArray();
+			Debug.Log("specials found: " + _special.Length);
 		}
 
 		// ReSharper disable once UnusedMember.Local
@@ -189,21 +192,19 @@ namespace Assets.Scripts
 				.FirstOrDefault();
 			while(parent != null && parent.GetComponent<ImageTargetBehaviour>() == null)
 				parent = parent.transform.parent;
-			if(parent != null)
-			{
-				_target = parent.GetComponent<ImageTargetBehaviour>();
-				_target.RegisterTrackableEventHandler(_handler);
-			}
+			if(parent == null)
+				return;
+			_target = parent.GetComponent<ImageTargetBehaviour>();
+			_target.RegisterTrackableEventHandler(_handler);
 		}
 
 		// ReSharper disable once UnusedMember.Local
 		private void OnDisable()
 		{
-			if(_target != null)
-			{
-				_target.UnregisterTrackableEventHandler(_handler);
-				_target = null;
-			}
+			if(_target == null)
+				return;
+			_target.UnregisterTrackableEventHandler(_handler);
+			_target = null;
 		}
 
 		// ReSharper disable once UnusedMember.Local

@@ -12,7 +12,7 @@
 		Tags
 		{
 			"RenderType" = "Opaque"
-			"LightMode" = "PrePassFinal"
+			//"LightMode" = "PrePassFinal"
 		}
 
 		LOD 200

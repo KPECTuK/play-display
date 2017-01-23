@@ -41,48 +41,10 @@ namespace Assets.Scripts
 		public const string ASSETS_PATH = "Assets/_Content/";
 		public const string RESOURCE_NAME = "particle";
 		public const string SHADER_NAME = "Particles/Additive";
-		public const string ASSET_TEXTURE = ASSETS_PATH + RESOURCE_NAME + ".png";
-		public const string ASSET_METERIAL = ASSETS_PATH + RESOURCE_NAME + ".mat";
+		public const string ASSET_TEXTURE = ASSETS_PATH + "Textures/" + RESOURCE_NAME + ".png";
+		public const string ASSET_METERIAL = ASSETS_PATH + "Materials/" + RESOURCE_NAME + ".mat";
 
 		private static string _materialUsed;
-
-		private string GetMaterialGuid()
-		{
-			if(string.IsNullOrEmpty(_materialUsed))
-			{
-				var guids = AssetDatabase.FindAssets(RESOURCE_NAME + " t:material", new[] { ASSETS_PATH.TrimEnd('/') });
-				_materialUsed = guids
-					.FirstOrDefault(guid =>
-					{
-						var asset = AssetDatabase.LoadAssetAtPath<Material>(AssetDatabase.GUIDToAssetPath(guid));
-						return
-							asset != null &&
-							string.Equals(asset.name, RESOURCE_NAME, StringComparison.InvariantCultureIgnoreCase) &&
-							asset.shader.name == SHADER_NAME;
-					});
-				if(_materialUsed == null)
-				{
-					var shader = Shader.Find(SHADER_NAME);
-					var material = new Material(shader);
-					var textureGuid = AssetDatabase.FindAssets(RESOURCE_NAME + " t:texture2D").FirstOrDefault();
-					if(string.IsNullOrEmpty(textureGuid))
-					{
-						var texture = new Texture2D(3, 3, TextureFormat.RGBA32, false);
-						texture.SetPixel(1, 1, Color.white);
-						var buffer = texture.EncodeToPNG();
-						using(var stream = File.Create(Path.Combine(Application.dataPath.Substring(0, Application.dataPath.Length - 6), ASSET_TEXTURE), buffer.Length))
-							stream.Write(buffer, 0, buffer.Length);
-						AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate | ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.DontDownloadFromCacheServer);
-						textureGuid = AssetDatabase.AssetPathToGUID(ASSET_TEXTURE);
-						DestroyImmediate(texture);
-					}
-					material.mainTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(AssetDatabase.GUIDToAssetPath(textureGuid));
-					AssetDatabase.CreateAsset(material, ASSET_METERIAL);
-					_materialUsed = AssetDatabase.AssetPathToGUID(ASSET_METERIAL);
-				}
-			}
-			return _materialUsed;
-		}
 
 		// ReSharper disable once UnusedMember.Local
 		private void Reset()
@@ -97,6 +59,7 @@ namespace Assets.Scripts
 			var relativeSourcesCenter = cameraLocation.Forward.normalized * (FPALNE_DISTANCE < cameraLocation.FarClip ? FPALNE_DISTANCE : cameraLocation.FarClip);
 			for(var counter = 0; counter < SOURCES_COUNT; counter++)
 			{
+				// instantiate target
 				var guids = AssetDatabase.FindAssets("ImageTarget", new[] { "Assets/Vuforia" });
 				var assetGuid = guids.FirstOrDefault(guid =>
 				{
@@ -104,10 +67,10 @@ namespace Assets.Scripts
 					return temp != null && temp.GetComponent<ImageTargetBehaviour>() != null;
 				});
 				if(string.IsNullOrEmpty(assetGuid))
-					throw new Exception("guid not found");
+					continue;
 				var targetInstance = Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(assetGuid)));
 				if(targetInstance == null)
-					throw new Exception("instance creation fail");
+					continue;
 				targetInstance.name = "iTarget_" + counter.ToString("00");
 				targetInstance.transform.SetParent(root.transform);
 				targetInstance.transform.localPosition =
@@ -116,6 +79,7 @@ namespace Assets.Scripts
 				targetInstance.transform.localRotation = Quaternion.identity;
 				targetInstance.transform.localScale = Vector3.one;
 
+				// instantiate particle source
 				var source = new GameObject("source_" + counter.ToString("00"), typeof(SourceController));
 				source.transform.SetParent(targetInstance.transform);
 				source.transform.localPosition = Vector3.zero;
@@ -124,6 +88,7 @@ namespace Assets.Scripts
 				var pRenderer = source.GetComponent<ParticleRenderer>();
 				pRenderer.material = AssetDatabase.LoadAssetAtPath<Material>(AssetDatabase.GUIDToAssetPath(GetMaterialGuid()));
 
+				// instantiate marker sign object
 				var marker = new GameObject(MARKER_NAME + "_" + counter.ToString("00"));
 				marker.transform.SetParent(targetInstance.transform);
 				marker.transform.localPosition = Vector3.zero;
@@ -135,13 +100,58 @@ namespace Assets.Scripts
 				ComponentUtility.PasteComponentAsNew(marker);
 				var shader = Shader.Find("PlayDisplay/Marker");
 				var mRenderer = marker.GetComponent<MeshRenderer>();
-				mRenderer.material.shader = shader;
+				mRenderer.sharedMaterial.shader = shader;
 				var query = typeof(Color)
 					.GetProperties(BindingFlags.Public | BindingFlags.Static)
 					.Where(info => info.PropertyType == typeof(Color))
 					.ToArray();
-				mRenderer.material.color = query.Any() ? (Color)query[UnityEngine.Random.Range(0, query.Length - 1)].GetValue(null, null) : Color.magenta;
+				mRenderer.sharedMaterial.color =
+					query.Any()
+						? (Color)query[UnityEngine.Random.Range(0, query.Length - 1)].GetValue(null, null)
+						: Color.magenta;
 			}
+		}
+
+		private string GetMaterialGuid()
+		{
+			// return used
+			if(!string.IsNullOrEmpty(_materialUsed))
+				return _materialUsed;
+
+			// try load existent
+			var guids = AssetDatabase.FindAssets(RESOURCE_NAME + " t:material", new[] { ASSETS_PATH.TrimEnd('/') });
+			_materialUsed = guids
+				.FirstOrDefault(guid =>
+				{
+					var asset = AssetDatabase.LoadAssetAtPath<Material>(AssetDatabase.GUIDToAssetPath(guid));
+					return
+						asset != null &&
+						string.Equals(asset.name, RESOURCE_NAME, StringComparison.InvariantCultureIgnoreCase) &&
+						asset.shader.name == SHADER_NAME;
+				});
+
+			if (_materialUsed != null)
+				return _materialUsed;
+
+			// create new one
+			var shader = Shader.Find(SHADER_NAME);
+			var material = new Material(shader);
+			var textureGuid = AssetDatabase.FindAssets(RESOURCE_NAME + " t:texture2D").FirstOrDefault();
+			if(string.IsNullOrEmpty(textureGuid))
+			{
+				var texture = new Texture2D(3, 3, TextureFormat.RGBA32, false);
+				texture.SetPixel(1, 1, Color.white);
+				var buffer = texture.EncodeToPNG();
+				using(var stream = File.Create(Path.Combine(Application.dataPath.Substring(0, Application.dataPath.Length - 6), ASSET_TEXTURE), buffer.Length))
+					stream.Write(buffer, 0, buffer.Length);
+				AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate | ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.DontDownloadFromCacheServer);
+				textureGuid = AssetDatabase.AssetPathToGUID(ASSET_TEXTURE);
+				DestroyImmediate(texture);
+			}
+			material.mainTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(AssetDatabase.GUIDToAssetPath(textureGuid));
+			AssetDatabase.CreateAsset(material, ASSET_METERIAL);
+			_materialUsed = AssetDatabase.AssetPathToGUID(ASSET_METERIAL);
+			return _materialUsed;
 		}
 	}
 }
